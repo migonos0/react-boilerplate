@@ -46,27 +46,38 @@ export const useInputRequest = <T, U>(
       isRequestSubscribed.current = false;
     };
   }, []);
+
   useEffect(() => {
     if (!input || !isRequestSubscribed.current) {
       return;
     }
+
     setIsLoading(true);
+
     requester(input)
       .then((response2) => {
+        if (!isRequestSubscribed.current) {
+          return;
+        }
         setResponse(response2);
         reset();
       })
       .catch((error2) => {
+        if (!isRequestSubscribed.current) {
+          return;
+        }
         setError(error2);
         reset();
       });
   }, [input, requester]);
+
   useEffect(() => {
     if (!response || !sideEffects?.onSuccess) {
       return;
     }
     sideEffects.onSuccess(response);
   }, [response, sideEffects]);
+
   useEffect(() => {
     if (!error || !sideEffects?.onError) {
       return;
