@@ -27,9 +27,10 @@ export const useInputRequest = <T, U>(
     onError?: (error: unknown) => void;
   }
 ) => {
+  const isRequestSubscribed = useRef<boolean>();
+
   const [isLoading, setIsLoading] = useState(false);
   const [input, setInput] = useState<T | undefined>();
-  const isRequestSubscribed = useRef(true);
 
   const [response, setResponse] = useState<U | undefined>();
   const [error, setError] = useState<undefined | unknown>();
@@ -40,29 +41,25 @@ export const useInputRequest = <T, U>(
   };
 
   useEffect(() => {
-    if (!input) {
+    isRequestSubscribed.current = true;
+    return () => {
+      isRequestSubscribed.current = false;
+    };
+  }, []);
+  useEffect(() => {
+    if (!input || !isRequestSubscribed.current) {
       return;
     }
     setIsLoading(true);
     requester(input)
       .then((response2) => {
-        if (!isRequestSubscribed.current) {
-          return;
-        }
         setResponse(response2);
         reset();
       })
       .catch((error2) => {
-        if (!isRequestSubscribed.current) {
-          return;
-        }
         setError(error2);
         reset();
       });
-
-    return () => {
-      isRequestSubscribed.current = false;
-    };
   }, [input, requester]);
   useEffect(() => {
     if (!response || !sideEffects?.onSuccess) {
