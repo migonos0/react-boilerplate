@@ -22,10 +22,16 @@ export const useServiceRequest = <T, U>(
   }
 ) => {
   const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState<U | undefined>();
-  const [error, setError] = useState<undefined | unknown>();
   const [localInput, setLocalInput] = useState<T | undefined>();
   const isRequestSubscribed = useRef(true);
+
+  const [response, setResponse] = useState<U | undefined>();
+  const [error, setError] = useState<undefined | unknown>();
+
+  const reset = () => {
+    setLoading(false);
+    setLocalInput(undefined);
+  };
 
   useEffect(() => {
     if (!localInput) {
@@ -38,14 +44,14 @@ export const useServiceRequest = <T, U>(
           return;
         }
         setResponse(response2);
-        setLoading(false);
+        reset();
       })
       .catch((error2) => {
         if (!isRequestSubscribed.current) {
           return;
         }
         setError(error2);
-        setLoading(false);
+        reset();
       });
 
     return () => {
