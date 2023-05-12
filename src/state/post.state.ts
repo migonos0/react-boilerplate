@@ -1,6 +1,8 @@
+import { useCallback } from "react";
 import { FIND_ALL_POSTS_ENDPOINT } from "../constants/service-endpoints";
 import { useSWR } from "../hooks/use-swr";
 import { findAllPosts } from "../services/post.service";
+import { Post } from "../schemas/post.schema";
 
 export const usePosts = () => {
   const key = FIND_ALL_POSTS_ENDPOINT;
@@ -9,5 +11,12 @@ export const usePosts = () => {
 
   error && console.error(error);
 
-  return { isLoading, posts: data, mutatePosts: mutate };
+  const addPost = useCallback(
+    (post: Post) => {
+      mutate((posts) => [...[post], ...(posts ?? [])], { revalidate: false });
+    },
+    [mutate]
+  );
+
+  return { isLoading, posts: data, addPost };
 };
